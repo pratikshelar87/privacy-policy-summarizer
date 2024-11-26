@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Privacy Policy Summarizer",
+  "version": "1.0",
+  "description": "Summarizes privacy policies from web pages.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs",
+    "storage",
+    "aiLanguageModelOriginTrial"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "src/icons/icon16.png",
+      "48": "src/icons/icon48.png"
+    }
+  },
+  "icons": {
+    "16": "src/icons/icon16.png",
+    "48": "src/icons/icon48.png"
+  },
+  "trial_tokens": [
+    "Auj1wTYTuIXaZ41cZLxesRnEoCK79RWCONn+esWHZD3lWeqmazNP6i8mszGYb2qBrF4mZxBy+zHuk7bDUKUISQ8AAAB4eyJvcmlnaW4iOiJjaHJvbWUtZXh0ZW5zaW9uOi8vbGZwamJiaHBkZ29ibGRoY2Rtb2pjZW5ubmNnZGxjYW8iLCJmZWF0dXJlIjoiQUlQcm9tcHRBUElGb3JFeHRlbnNpb24iLCJleHBpcnkiOjE3NjA0ODYzOTl9"
+  ]
+
+}
