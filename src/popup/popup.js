@@ -21,16 +21,29 @@ class PrivacyAnalyzer {
 
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            console.log('Active tab:', tab);
-            const [{ result }] = await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                function: () => document.body.innerText
-            });
-            console.log('Page content:', result);
+            const url = tab.url;
+            console.log('Active tab URL:', url);
 
-            const analysis = await this.aiService.analyzePage(result);
-            console.log('Analysis result:', analysis);
-            this.displayResults(JSON.parse(analysis));
+            // Check local storage for existing analysis
+            const storedAnalysis = localStorage.getItem(url);
+            if (storedAnalysis) {
+                console.log('Using stored analysis:', storedAnalysis);
+                this.displayResults(JSON.parse(storedAnalysis));
+            } else {
+                console.log('No stored analysis found, performing AI analysis');
+                const [{ result }] = await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    function: () => document.body.innerText
+                });
+                console.log('Page content:', result);
+
+                const analysis = await this.aiService.analyzePage(result);
+                console.log('Analysis result:', analysis);
+
+                // Save the analysis result in local storage
+                localStorage.setItem(url, analysis);
+                this.displayResults(JSON.parse(analysis));
+            }
         } catch (error) {
             this.showError('Unable to analyze this privacy policy. Please try again.');
             console.error('Analysis failed:', error);
@@ -48,36 +61,47 @@ class PrivacyAnalyzer {
         lights.forEach(light => light.classList.remove('active'));
 
         switch (analysis.overallRisk) {
-            case 'HIGH_RISK':
+            case 'HIGH':
                 document.querySelector('.light.red').classList.add('active');
                 document.querySelector('.score-text').textContent = 'High Privacy Risk';
                 break;
-            case 'MEDIUM_RISK':
+            case 'MEDIUM':
                 document.querySelector('.light.yellow').classList.add('active');
                 document.querySelector('.score-text').textContent = 'Medium Privacy Risk';
                 break;
-            case 'LOW_RISK':
+            case 'LOW':
                 document.querySelector('.light.green').classList.add('active');
                 document.querySelector('.score-text').textContent = 'Low Privacy Risk';
                 break;
         }
 
-        // Display categories
+        // Display categories in a 2x2 grid with accordion
         this.summaryDiv.innerHTML = `
             <div class="category">
                 <div class="category-header">Overall Assessment</div>
                 <div class="category-content">${analysis.summary}</div>
             </div>
-            ${analysis.categories.map(category => `
-                <div class="category">
-                    <div class="category-header">
-                        <div class="indicator ${category.risk.toLowerCase()}"></div>
-                        ${this.formatCategoryName(category.name)}
+            <div class="grid-container">
+                ${analysis.categories.map(category => `
+                    <div class="category">
+                        <div class="category-header">
+                            <div class="indicator ${category.risk.toLowerCase()}"></div>
+                            ${this.formatCategoryName(category.name)}
+                        </div>
+                        <div class="category-content">${category.details}</div>
                     </div>
-                    <div class="category-content">${category.details}</div>
-                </div>
-            `).join('')}
+                `).join('')}
+            </div>
         `;
+
+        // Add event listeners to toggle the active class on click
+        const headers = this.summaryDiv.querySelectorAll('.category-header');
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                content.style.display = content.style.display === 'block' ? 'none' : 'block';
+            });
+        });
     }
 
     formatCategoryName(name) {
