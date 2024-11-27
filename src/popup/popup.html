@@ -24,6 +24,14 @@
       background: #f5f5f5;
     }
 
+    .risk-progress-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 10px; /* Add padding to the container */
+      width: 100%;
+    }
+
     .traffic-lights {
       display: flex;
       gap: 10px;
@@ -36,16 +44,12 @@
       border-radius: 50%;
       display: none;
     }
-
-    .light.red { background-color: #dc2626; }
-    .light.yellow { background-color: #eab308; }
-    .light.green { background-color: #16a34a; }
-    .light.active { display: block; }
     
 
     .score-text {
       font-size: 14px;
       font-weight: 600;
+      margin-bottom: 5px;
     }
 
     .category {
@@ -64,7 +68,7 @@
 
     .category-header {
       font-weight: 600;
-      margin-bottom: 8px;
+      
       display: flex;
       align-items: center;
       gap: 8px;
@@ -78,6 +82,7 @@
 
     .category-content.active {
       display: block;
+      margin-top: 5px;
     }
 
     .category-header {
@@ -96,25 +101,52 @@
       border-radius: 50%;
     }
 
-    .indicator.high { background-color: #dc2626; }
-    .indicator.medium { background-color: #eab308; }
-    .indicator.low { background-color: #16a34a; }
+    .indicator.high { background-color: #f56565cf; } /* Pastel red */
+    .indicator.medium { background-color: #d3bd75; } /* Pastel yellow */
+    .indicator.low { background-color: #58a46a; } /* Pastel green */
+    
+    
+
+    .progress-bar {
+      width: 100%;
+      background-color: #e5e7eb;
+      border-radius: 8px;
+      height: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress {
+      height: 100%;
+      width: 100%;
+      background-color: #f8d7da; /* Pastel red by default */
+      transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    }
+
+    .progress-label {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+
   </style>
 </head>
 <body>
   <div id="loading" class="loading" style="display:none;">Analyzing privacy policy...</div>
   <div id="result-container" style="display:none;">
     <div class="privacy-score">
-      <div class="traffic-lights">
-        <div class="light red" ></div>
-        <div class="light yellow"></div>
-        <div class="light green"></div>
+      <div class="risk-progress-container">
+        <div class="score-text"></div>
+        <div class="progress-bar">
+          <div class="progress" id="risk-progress"></div>
+        </div>
       </div>
-      <div class="score-text"></div>
+      
     </div>
     <div id="summary"></div>
   </div>
   <script type="module" src="aiProvider.js"></script>
   <script type="module" src="popup.js"></script>
 </body>
-</html> 
+</html>

@@ -52,57 +52,85 @@ class PrivacyAnalyzer {
         }
     }
 
+    calculateRiskPercentage(analysis) {
+        let highRiskCount = analysis.categories.filter(category => category.risk === 'HIGH').length;
+        let mediumRiskCount = analysis.categories.filter(category => category.risk === 'MEDIUM').length;
+        return Math.min((highRiskCount * 30 + mediumRiskCount * 20), 100);
+    }
+
+    
+
+     calculateProgressColor(score) {
+        let progressColor;
+        if (score >= 75) {
+            progressColor = '#f28b82'; // Muted red
+        } else if (score >= 50) {
+            progressColor = '#fbbc04'; // Muted yellow
+        } else {
+            progressColor = '#81c995'; // Muted green
+        }
+        return progressColor;
+    }
+
     displayResults(analysis) {
         console.log('Displaying results:', analysis);
         this.resultContainer.style.display = 'block';
-
-        // Set traffic light
+    
+        // Traffic lights and text
         const lights = document.querySelectorAll('.light');
         lights.forEach(light => light.classList.remove('active'));
-
+    
+        const scoreText = document.querySelector('.score-text');
+        const progressBar = document.getElementById('risk-progress');
+    
+        // Calculate risk percentage and set progress bar properties
+        let riskPercentage = this.calculateRiskPercentage(analysis);
+        console.log('Risk percentage:', riskPercentage);
+        let progressColor = this.calculateProgressColor(riskPercentage);
+    
         switch (analysis.overallRisk) {
             case 'HIGH':
-                document.querySelector('.light.red').classList.add('active');
-                document.querySelector('.score-text').textContent = 'High Privacy Risk';
+                //document.querySelector('.light.red').classList.add('active');
+                scoreText.textContent = 'High Risk Privacy Policy';
                 break;
             case 'MEDIUM':
-                document.querySelector('.light.yellow').classList.add('active');
-                document.querySelector('.score-text').textContent = 'Medium Privacy Risk';
+                //document.querySelector('.light.yellow').classList.add('active');
+                scoreText.textContent = 'Medium Risk Privacy Policy';
                 break;
             case 'LOW':
-                document.querySelector('.light.green').classList.add('active');
-                document.querySelector('.score-text').textContent = 'Low Privacy Risk';
+                //document.querySelector('.light.green').classList.add('active');
+                scoreText.textContent = 'Low Risk Privacy Policy';
                 break;
         }
-
-        // Display categories in a 2x2 grid with accordion
-        this.summaryDiv.innerHTML = `
+    
+        // Update progress bar
+        progressBar.style.width = `${riskPercentage}%`;
+        progressBar.style.backgroundColor = progressColor;
+    
+        // Populate categories
+        const summaryDiv = document.getElementById('summary');
+        summaryDiv.innerHTML = analysis.categories.map(category => `
             <div class="category">
-                <div class="category-header">Overall Assessment</div>
-                <div class="category-content">${analysis.summary}</div>
+                <div class="category-header">
+                    <div>${this.formatCategoryName(category.name)}</div>
+                    <div class="indicator ${category.risk.toLowerCase()}"></div>
+                </div>
+                <div class="category-content">${category.details}</div>
             </div>
-            <div class="grid-container">
-                ${analysis.categories.map(category => `
-                    <div class="category">
-                        <div class="category-header">
-                            <div class="indicator ${category.risk.toLowerCase()}"></div>
-                            ${this.formatCategoryName(category.name)}
-                        </div>
-                        <div class="category-content">${category.details}</div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-
-        // Add event listeners to toggle the active class on click
-        const headers = this.summaryDiv.querySelectorAll('.category-header');
+        `).join('');
+    
+        // Add toggle functionality
+        const headers = summaryDiv.querySelectorAll('.category-header');
         headers.forEach(header => {
             header.addEventListener('click', () => {
                 const content = header.nextElementSibling;
-                content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                content.classList.toggle('active');
             });
         });
     }
+    
+    
+
 
     formatCategoryName(name) {
         return name.split('_')
