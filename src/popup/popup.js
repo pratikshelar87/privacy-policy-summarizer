@@ -89,15 +89,20 @@ class PrivacyAnalyzer {
         let progressColor = this.calculateProgressColor(riskPercentage);
     
         switch (analysis.overallRisk) {
+            // response from the AI model could contain either HIGH_RISK or HIGH since prompt API does not have a strict JSON schema like open AI
+            
             case 'HIGH':
+            case 'HIGH_RISK':
                 //document.querySelector('.light.red').classList.add('active');
                 scoreText.textContent = 'High Risk Privacy Policy';
                 break;
             case 'MEDIUM':
+            case 'MEDIUM_RISK':
                 //document.querySelector('.light.yellow').classList.add('active');
                 scoreText.textContent = 'Medium Risk Privacy Policy';
                 break;
             case 'LOW':
+            case 'LOW_RISK':
                 //document.querySelector('.light.green').classList.add('active');
                 scoreText.textContent = 'Low Risk Privacy Policy';
                 break;
