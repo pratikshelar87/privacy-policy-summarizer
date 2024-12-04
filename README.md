@@ -7,6 +7,7 @@ The Privacy Policy Summarizer is a Chrome extension designed to extract and summ
 - Automatically detects and summarizes privacy policies from web pages.
 - User-friendly popup interface to display summarized information.
 - Lightweight and efficient background script for seamless operation.
+- Utilizes AI services like Chrome Prompt API for analysis.
 
 ## Installation
 1. Clone the repository:
@@ -24,6 +25,10 @@ The Privacy Policy Summarizer is a Chrome extension designed to extract and summ
 ## Usage
 - Click on the extension icon in the Chrome toolbar to open the popup.
 - The extension will automatically extract and summarize the privacy policy of the current webpage.
+
+## Configuration
+- Ensure that the `manifest.json` file includes the necessary permissions and icons.
+- Update the AI provider API keys in the `src/popup/aiProvider.js` file.
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.

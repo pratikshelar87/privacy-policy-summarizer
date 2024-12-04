@@ -63,7 +63,7 @@ class PrivacyAnalyzer {
 
     changeIcon(detected) {
         const iconPath = detected ? 'src/icons/privacy_detected_filled.png' : 'src/icons/privacy_detected.png';
-        chrome.action.setIcon({ path: iconPath });
+        //chrome.action.setIcon({ path: iconPath });
     }
 
     calculateRiskPercentage(analysis) {
