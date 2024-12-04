@@ -24,43 +24,55 @@ class PrivacyAnalyzer {
             const url = tab.url;
             console.log('Active tab URL:', url);
 
-            // Check local storage for existing analysis
-            const storedAnalysis = localStorage.getItem(url);
-            if (storedAnalysis) {
-                console.log('Using stored analysis:', storedAnalysis);
-                this.displayResults(JSON.parse(storedAnalysis));
+            // Check if the URL contains "privacy" or "legal" or "policy"
+            if (url.includes('privacy') || url.includes('legal') || url.includes('policy')) {
+                // Check local storage for existing analysis
+                const storedAnalysis = localStorage.getItem(url);
+                if (storedAnalysis) {
+                    console.log('Using stored analysis:', storedAnalysis);
+                    this.displayResults(JSON.parse(storedAnalysis));
+                    this.changeIcon(true);
+                } else {
+                    console.log('No stored analysis found, performing AI analysis');
+                    const [{ result }] = await chrome.scripting.executeScript({
+                        target: { tabId: tab.id },
+                        function: () => document.body.innerText
+                    });
+                    console.log('Page content:', result);
+
+                    const analysis = await this.aiService.analyzePage(result);
+                    console.log('Analysis result:', analysis);
+
+                    // Save the analysis result in local storage
+                    localStorage.setItem(url, analysis);
+                    this.displayResults(JSON.parse(analysis));  
+                    this.changeIcon(true);
+                }
             } else {
-                console.log('No stored analysis found, performing AI analysis');
-                const [{ result }] = await chrome.scripting.executeScript({
-                    target: { tabId: tab.id },
-                    function: () => document.body.innerText
-                });
-                console.log('Page content:', result);
-
-                const analysis = await this.aiService.analyzePage(result);
-                console.log('Analysis result:', analysis);
-
-                // Save the analysis result in local storage
-                localStorage.setItem(url, analysis);
-                this.displayResults(JSON.parse(analysis));
+                console.log('URL does not contain "privacy", "legal", or "policy", skipping analysis');
+                this.changeIcon(false);
             }
         } catch (error) {
             this.showError('Unable to analyze this privacy policy. Please try again.');
             console.error('Analysis failed:', error);
+            this.changeIcon(false);
         } finally {
             this.loadingDiv.style.display = 'none';
         }
     }
 
+    changeIcon(detected) {
+        const iconPath = detected ? 'src/icons/privacy_detected_filled.png' : 'src/icons/privacy_detected.png';
+        chrome.action.setIcon({ path: iconPath });
+    }
+
     calculateRiskPercentage(analysis) {
-        let highRiskCount = analysis.categories.filter(category => category.risk === 'HIGH').length;
-        let mediumRiskCount = analysis.categories.filter(category => category.risk === 'MEDIUM').length;
+        let highRiskCount = Array.isArray(analysis.categories) ? analysis.categories.filter(category => category.risk === 'HIGH').length : 0;
+        let mediumRiskCount = Array.isArray(analysis.categories) ? analysis.categories.filter(category => category.risk === 'MEDIUM').length : 0;
         return Math.min((highRiskCount * 30 + mediumRiskCount * 20), 100);
     }
 
-    
-
-     calculateProgressColor(score) {
+    calculateProgressColor(score) {
         let progressColor;
         if (score >= 75) {
             progressColor = '#f28b82'; // Muted red
@@ -74,44 +86,44 @@ class PrivacyAnalyzer {
 
     displayResults(analysis) {
         console.log('Displaying results:', analysis);
+        console.log('Displaying results:', analysis);
+        console.log('Type of analysis:', typeof analysis);  
+        console.log('Keys in analysis:', Object.keys(analysis));
+        console.log('Categories in analysis:', analysis.categories);
         this.resultContainer.style.display = 'block';
-    
+
         // Traffic lights and text
         const lights = document.querySelectorAll('.light');
         lights.forEach(light => light.classList.remove('active'));
-    
+
         const scoreText = document.querySelector('.score-text');
         const progressBar = document.getElementById('risk-progress');
-    
+
         // Calculate risk percentage and set progress bar properties
         let riskPercentage = this.calculateRiskPercentage(analysis);
         console.log('Risk percentage:', riskPercentage);
         let progressColor = this.calculateProgressColor(riskPercentage);
-    
+        
         switch (analysis.overallRisk) {
-            // response from the AI model could contain either HIGH_RISK or HIGH since prompt API does not have a strict JSON schema like open AI
-            
             case 'HIGH':
             case 'HIGH_RISK':
-                //document.querySelector('.light.red').classList.add('active');
                 scoreText.textContent = 'High Risk Privacy Policy';
                 break;
             case 'MEDIUM':
             case 'MEDIUM_RISK':
-                //document.querySelector('.light.yellow').classList.add('active');
                 scoreText.textContent = 'Medium Risk Privacy Policy';
                 break;
             case 'LOW':
             case 'LOW_RISK':
-                //document.querySelector('.light.green').classList.add('active');
                 scoreText.textContent = 'Low Risk Privacy Policy';
                 break;
         }
-    
+
         // Update progress bar
         progressBar.style.width = `${riskPercentage}%`;
         progressBar.style.backgroundColor = progressColor;
-    
+
+        console.log('Categories', analysis.categories);
         // Populate categories
         const summaryDiv = document.getElementById('summary');
         summaryDiv.innerHTML = analysis.categories.map(category => `
@@ -123,7 +135,6 @@ class PrivacyAnalyzer {
                 <div class="category-content">${category.details}</div>
             </div>
         `).join('');
-    
         // Add toggle functionality
         const headers = summaryDiv.querySelectorAll('.category-header');
         headers.forEach(header => {
@@ -133,9 +144,6 @@ class PrivacyAnalyzer {
             });
         });
     }
-    
-    
-
 
     formatCategoryName(name) {
         return name.split('_')

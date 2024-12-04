@@ -22,13 +22,12 @@
   "action": {
     "default_popup": "src/popup/popup.html",
     "default_icon": {
-      "16": "src/icons/icon16.png",
-      "48": "src/icons/icon48.png"
+      "16": "src/icons/privacy_detected.png"
     }
   },
   "icons": {
-    "16": "src/icons/icon16.png",
-    "48": "src/icons/icon48.png"
+    "16":"src/icons/privacy_detected.png",
+    "48":"src/icons/privacy_detected_filled.png"  
   },
   "trial_tokens": [
     "Auj1wTYTuIXaZ41cZLxesRnEoCK79RWCONn+esWHZD3lWeqmazNP6i8mszGYb2qBrF4mZxBy+zHuk7bDUKUISQ8AAAB4eyJvcmlnaW4iOiJjaHJvbWUtZXh0ZW5zaW9uOi8vbGZwamJiaHBkZ29ibGRoY2Rtb2pjZW5ubmNnZGxjYW8iLCJmZWF0dXJlIjoiQUlQcm9tcHRBUElGb3JFeHRlbnNpb24iLCJleHBpcnkiOjE3NjA0ODYzOTl9"

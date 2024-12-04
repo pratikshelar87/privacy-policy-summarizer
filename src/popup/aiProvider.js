@@ -31,7 +31,7 @@ export class AIProviderService {
         return `Analyze this privacy policy and provide a structured analysis with:
     
         1. Overall Risk Level:
-        Rate as one of: HIGH_RISK, MEDIUM_RISK, or LOW_RISK based on data collection and sharing practices.
+        Rate as one of: HIGH, MEDIUM, or LOW risk based on data collection and sharing practices.
     
         2. Provide analysis in these categories, marking each with a risk level (HIGH, MEDIUM, or LOW):
         - DATA_COLLECTION: What personal data is collected
